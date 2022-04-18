@@ -1,0 +1,44 @@
+MODULE main
+    
+    VAR
+        lock        : boolean;
+        process1    : process processes(lock);
+        process2    : process processes(lock);
+
+    ASSIGN
+        init(lock)  := FALSE;
+    
+    SPEC AG ! (process1.state = critical & process2.state = critical)
+    SPEC AG (process1.state = entering -> AF process1.state = critical)
+    SPEC AG (process1.state = critical -> AF process1.state = exiting)
+    SPEC AG (process1.state = exiting -> AF process1.state = idle)
+
+MODULE processes(lock)
+    VAR
+        state : {idle, entering, critical, exiting};
+
+    ASSIGN
+        init(state) := idle;
+        
+        next(state) :=
+                        case
+                            state = idle : {idle, entering};
+                            state = entering & lock = FALSE : {critical};
+                            state = critical : {exiting};
+                            state = exiting : idle;
+                            
+                            TRUE : state;
+                        esac;
+       
+        next(lock)  := 
+                        case
+                            state = entering : TRUE;
+                            state = exiting : FALSE;
+
+                            TRUE : lock;
+                        esac;
+        
+    FAIRNESS
+        running
+
+ASSIGN
