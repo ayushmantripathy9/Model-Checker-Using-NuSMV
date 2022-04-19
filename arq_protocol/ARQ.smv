@@ -1,0 +1,53 @@
+MODULE main
+VAR 
+ trial_sender : process sender(trial_reciever.ack_no);
+ trial_reciever : process reciever (trial_sender.seq_no); 
+ASSIGN
+LTLSPEC  F ((trial_sender.seq_no<trial_reciever.ack_no)->(trial_sender.seq_no = trial_reciever.ack_no ))
+LTLSPEC  F (trial_sender.seq_no=trial_reciever.ack_no+1)->(trial_sender.seq_no = trial_reciever.ack_no)
+LTLSPEC  G ((trial_sender.seq_no+1=trial_reciever.ack_no) | (trial_sender.seq_no=trial_reciever.ack_no))
+LTLSPEC  (trial_sender.seq_no =trial_reciever.ack_no) U (trial_sender.seq_no+1=trial_reciever.ack_no)
+
+MODULE sender(ack_no)
+VAR
+ state : {next_msg,wait_for_ack,recieved_ack,timeout,idle};
+ seq_no : -1..10;
+ASSIGN
+ init(seq_no) := -1;
+ init(state) := idle;
+ next(seq_no) := case 
+                state = next_msg & seq_no = ack_no & seq_no < 10 : seq_no+1;
+                state = next_msg & seq_no = ack_no  &seq_no = 10 : 0;
+                TRUE : seq_no;
+                esac;
+ next(state) := case
+                state = idle : next_msg;
+                state = next_msg : wait_for_ack;
+                state = wait_for_ack : {timeout,recieved_ack};
+                state = recieved_ack & ack_no = seq_no+1: next_msg;
+                state = recieved_ack & ack_no != seq_no+1: timeout;
+                state = timeout : next_msg; 
+                TRUE : state;
+                esac;
+
+MODULE reciever(seq_no)
+VAR 
+ state : {wait_for_msg,msg_received,send_ack};
+ ack_no : 0..10;
+ASSIGN
+ init(ack_no) := 0;
+ init(state) := wait_for_msg;
+ next(ack_no) := case 
+                 state = send_ack & ack_no = seq_no & ack_no < 10 : ack_no + 1;
+                 state = send_ack & ack_no = seq_no & ack_no = 10 : 0;
+                 TRUE : ack_no;
+                 esac;
+ next(state) := case
+                state = wait_for_msg & ack_no = seq_no : msg_received;
+                state = msg_received : send_ack;
+                state = send_ack : wait_for_msg;
+                TRUE: state;
+                esac;  
+
+FAIRNESS
+ running
