@@ -7,7 +7,7 @@ MODULE main
  TRANS
   case
    count_val = 7 : next(count_val) = 0;
-   TRUE : next(count_val) = ((count_val + 1) mod 32);
+   TRUE : next(count_val) = ((count_val + 1) mod 8);
   esac
   
 LTLSPEC !G F (count_val = 8)
