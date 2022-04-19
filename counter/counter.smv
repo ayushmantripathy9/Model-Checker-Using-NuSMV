@@ -13,4 +13,3 @@ MODULE main
 LTLSPEC !G F (count_val = 8)
 LTLSPEC G F (count_val = 0 -> count_val = 7)
 LTLSPEC F (count_val = 2 -> count_val = 0)
-LTLSPEC !G F (count_val = 2)
