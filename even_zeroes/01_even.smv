@@ -1,0 +1,20 @@
+MODULE main
+VAR
+ current_head: {0,1};
+ automata : even_0(current_head);
+ASSIGN
+  init(current_head) := 0;
+
+
+MODULE even_0(curr_digit)
+VAR
+ state: {even_0,odd_0};
+ASSIGN
+ init(state) := even_0;
+ next(state) := case
+                state = even_0 & curr_digit = 0 : odd_0;
+                state = even_0 & curr_digit = 1 : even_0;
+                state = odd_0 & curr_digit = 0 : even_0;
+                state = odd_0 & curr_digit = 1 : odd_0;
+                TRUE : state;
+                esac;

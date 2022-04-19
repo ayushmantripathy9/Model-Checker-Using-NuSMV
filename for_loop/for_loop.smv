@@ -1,0 +1,33 @@
+MODULE main
+ VAR
+  final:0..15;
+  for_loop: for_loop_inc(final);
+ ASSIGN
+  init(final) := 9;
+  
+MODULE for_loop_inc(final)
+VAR
+ counter:0..18;
+ state: {idle,entering,looping,exiting,exit};
+ASSIGN
+ init(counter) := 0;
+ init(state) := idle;
+ next(state) := case
+                state = idle : entering;
+                state = entering : looping;
+                state = looping & counter+1 < (final) : looping;
+                state = looping & counter+1 >= (final) : exiting;
+                state = exiting : exit;
+                TRUE: state;
+                esac;
+ next(counter) := case
+                    state = entering : 0;
+                    state  = looping : counter+1;
+                    state = exiting : 0;
+                    TRUE : counter;
+                  esac;
+LTLSPEC  G F (counter = 2); 
+ 
+
+
+
