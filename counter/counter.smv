@@ -1,0 +1,15 @@
+--This is a counter modulo 8.
+MODULE main
+ VAR
+  count_val : 0..31;
+ ASSIGN
+  init(count_val) := 0;
+ TRANS
+  case
+   count_val = 7 : next(count_val) = 0;
+   TRUE : next(count_val) = ((count_val + 1) mod 32);
+  esac
+  
+LTLSPEC !G F (count_val = 8)
+LTLSPEC G F (count_val = 0 -> count_val = 7)
+LTLSPEC F (count_val = 2 -> count_val = 0)
